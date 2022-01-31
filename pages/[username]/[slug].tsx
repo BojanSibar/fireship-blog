@@ -7,6 +7,10 @@ import {
 } from "../../libs/firebase";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import PostModel from "../../types/PostFirebaseModel";
+import AuthCheck from "../../components/AuthCheck";
+import Link from "next/link";
+import HeartButton from "../../components/HeartButton";
+import { postConverter } from "../../libs/firebaseModels";
 
 type StaticProps = {
   params: {
@@ -63,7 +67,7 @@ type PostProps = {
 };
 
 export default function Post(props: PostProps) {
-  const postRef = firestore.doc(props.path);
+  const postRef = firestore.doc(props.path).withConverter(postConverter);
   const [realtimePost] = useDocumentData<PostModel>(postRef as any);
 
   const post = realtimePost || props.post;
@@ -78,6 +82,15 @@ export default function Post(props: PostProps) {
         <p>
           <strong>{post.heartCount || 0} 🤍</strong>
         </p>
+        <AuthCheck
+          fallback={
+            <Link href="/enter">
+              <button>💗 Sign Up</button>
+            </Link>
+          }
+        >
+          <HeartButton postRef={postRef} />
+        </AuthCheck>
       </aside>
     </main>
   );
